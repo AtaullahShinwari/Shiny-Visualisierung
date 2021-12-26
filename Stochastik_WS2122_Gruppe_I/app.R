@@ -1,7 +1,8 @@
 library(shiny)
-
+library(tidyverse)
+library(ggplot2)
 ### Daten Laden ###
-
+heart <- read.csv(file = "C:/Users/rseid/Desktop/Stochastik/Abgabe/data/heart.csv")
 
 ### Quellen ### https://stackoverflow.com/questions/42047422/create-url-hyperlink-in-r-shiny
 urlcat <- a("Link", href="https://i.redd.it/eknbn2b019v71.png")
@@ -35,8 +36,10 @@ ui <- fluidPage(
 
 
 server <- function(input, output) {
-################PUSH TEST
-  TEST
+
+  heart_age <- heart %>% group_by(Age) %>% count()
+  heart_age_barplot <- ggplot(heart_age, aes(x = Age, y = n)) + scale_y_continuous(name = "Anzahl") + ggtitle("Altersverteilung") + theme(plot.title = element_text(size = 11, hjust = 0.5)) + geom_bar(stat = "identity", colour = "yellowgreen")
+  heart_age_barplot
 }
 
 shinyApp(ui = ui, server = server)
