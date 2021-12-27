@@ -2,6 +2,7 @@ library(shiny)
 library(tidyverse)
 library(ggplot2)
 library(plotly)
+library(pheatmap)
 ### Daten Laden ###
 heart <- read.csv(file = "C:/Users/rseid/Desktop/Stochastik/Abgabe/data/heart.csv")
 
@@ -27,7 +28,8 @@ ui <- fluidPage(
                              img(src = "Katze_Korrelation.png"), br(),
                              
                          )),
-                tabPanel("Exploration", sidebarLayout(position = "left", fluid = TRUE,sidebarPanel(selectInput("plotname", "Plot auswählen", c("Altersverteilung","Art des Brustschmerzes","Ruhepulsverteilung", "Cholesterolspiegel","Blutzuckerspiegelverteilung","Ergebnisse des Ruhe-Elektrokardiogramms", "Höchster gemessener Herzschlag", "Angina durch Belastung", "OldPeak", "ST_Slope", "HeartDisease"))), mainPanel(plotlyOutput("selectplot")))),
+                tabPanel("Der Datensatz", 
+                         sidebarLayout(position = "left", fluid = TRUE,sidebarPanel(selectInput("plotname", "Plot auswählen", c("Altersverteilung","Art des Brustschmerzes","Ruhepulsverteilung", "Cholesterolspiegel","Blutzuckerspiegelverteilung","Ergebnisse des Ruhe-Elektrokardiogramms", "Höchster gemessener Herzschlag", "Angina durch Belastung", "OldPeak", "ST_Slope", "HeartDisease")), actionButton("heat", "Heatmap"),checkboxGroupInput("checkbox", "Datansatz auswählen", choices = c("Rohdaten", "ohne Ausreißer"), selected = "Rohdaten")), mainPanel(plotlyOutput("selectplot"), br(), plotOutput("heat")))),
                 tabPanel("Satz von Bayes")
                 #Quelle: https://shiny.rstudio.com/articles/tabsets.html
                 
@@ -37,9 +39,9 @@ ui <- fluidPage(
 
 
 server <- function(input, output) {
- 
-  output$selectplot <- renderPlotly({   
-    
+
+output$selectplot <- renderPlotly({   
+    if(input$checkbox == "Rohdaten"){
     if(input$plotname == "Altersverteilung"){
       heart_age <- heart %>% group_by(Age, Sex) %>% count()
       Plot <- ggplotly(ggplot(heart_age, aes(x = Age, y = n)) 
@@ -138,15 +140,22 @@ server <- function(input, output) {
                        + ggtitle("HeartDisease") 
                        + theme(plot.title = element_text(size = 11, hjust = 0.5)) 
                        + geom_bar(aes(fill = Sex), stat = "identity", position = "dodge", width = 0.7))
-    }
+    }}
     Plot
     })
-  
+  observeEvent(input$heat, {
+    if(input$checkbox == "Rohdaten"){
+    heart$Sex <- as.numeric(c("M" = 0, "F" = 1)[heart$Sex])
+    heart$ChestPainType <- as.numeric(c("ATA" = 0, "NAP" = 1, "ASY" = 2, "TA" = 3)[heart$ChestPainType])
+    heart$RestingECG <- as.numeric(c("Normal" = 0, "ST" = 1, "LVH" = 2)[heart$RestingECG])
+    heart$ExerciseAngina <- as.numeric(c("N" = 0, "Y" = 1)[heart$ExerciseAngina])
+    heart$ST_Slope <- as.numeric(c("Up" = 0, "Flat" = 1, "Down" = 2))
+    heart_cor <- cor(as.matrix(heart))
+    heatplot <- pheatmap(heart_cor, display_numbers = T, main = "Heatmap der Rohdaten" )
+    output$heat <-renderPlot({heatplot})
+    }
+  })
   }
+
   
-
-
-
-
-
 shinyApp(ui = ui, server = server)
