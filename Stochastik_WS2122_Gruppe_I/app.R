@@ -113,8 +113,8 @@ server <- function(input, output) {
                        + geom_bar(aes(fill = Sex), stat = "identity", position = "dodge", width = 0.7))
     }
     if(input$plotname == "OldPeak"){
-      heart_oldpeak <- heart %>% group_by(OldPeak, Sex) %>% count()
-      Plot <- ggplotly(ggplot(heart_oldpeak, aes(x = OldPeak, y = n)) 
+      heart_oldpeak <- heart %>% group_by(Oldpeak, Sex) %>% count()
+      Plot <- ggplotly(ggplot(heart_oldpeak, aes(x = Oldpeak, y = n)) 
                        + scale_y_continuous(name = "Anzahl")
                        + scale_fill_manual("Legende",values = c("M" = "chartreuse4","F" = "chartreuse3"))
                        + ggtitle("OldPeak") 
