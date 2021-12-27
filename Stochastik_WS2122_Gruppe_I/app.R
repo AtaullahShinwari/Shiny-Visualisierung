@@ -1,6 +1,7 @@
 library(shiny)
 library(tidyverse)
 library(ggplot2)
+library(plotly)
 ### Daten Laden ###
 heart <- read.csv(file = "C:/Users/rseid/Desktop/Stochastik/Abgabe/data/heart.csv")
 
@@ -26,7 +27,7 @@ ui <- fluidPage(
                              img(src = "Katze_Korrelation.png"), br(),
                              
                          )),
-                tabPanel("Exploration"),
+                tabPanel("Exploration", sidebarLayout(position = "left", fluid = TRUE,sidebarPanel(selectInput("plotname", "Plot auswählen", c("Altersverteilung",""))), mainPanel(plotlyOutput("selectplot")))),
                 tabPanel("Satz von Bayes")
                 #Quelle: https://shiny.rstudio.com/articles/tabsets.html
                 
@@ -37,9 +38,27 @@ ui <- fluidPage(
 
 server <- function(input, output) {
 
-  heart_age <- heart %>% group_by(Age) %>% count()
-  heart_age_barplot <- ggplot(heart_age, aes(x = Age, y = n)) + scale_y_continuous(name = "Anzahl") + ggtitle("Altersverteilung") + theme(plot.title = element_text(size = 11, hjust = 0.5)) + geom_bar(stat = "identity", colour = "yellowgreen")
-  heart_age_barplot
-}
+  reactivedf <- reactive({heart})
+  
+  output$selectplot <- renderPlotly({   
+    
+    if(input$plotname == "Altersverteilung"){
+      heart_age <- heart %>% group_by(Age, Sex) %>% count()
+      Plot <- ggplotly(ggplot(heart_age, aes(x = Age, y = n)) 
+                       + scale_y_continuous(name = "Anzahl") 
+                       + ggtitle("Altersverteilung") 
+                       + theme(plot.title = element_text(size = 11, hjust = 0.5)) 
+                       + geom_bar(aes(fill = Sex), stat = "identity", colour = "yellowgreen", position = "dodge", width = 0.7))
+      }
+    
+    Plot
+    })
+  
+  }
+  
+
+
+
+
 
 shinyApp(ui = ui, server = server)
