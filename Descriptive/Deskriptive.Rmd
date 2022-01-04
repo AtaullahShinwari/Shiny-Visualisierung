@@ -43,6 +43,7 @@ print("Check whether an attribute has low variance (threshold), since there is n
 names(heart)[nearZeroVar(heart)]
 summary(heart)
 str(heart)
+#änderung
 ```
 
 ```{r}
