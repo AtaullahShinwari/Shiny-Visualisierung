@@ -7,8 +7,8 @@ Nächste Schritte:
   1.3 Häufigkeiten, Mittelwert, Median und Modus (Modus auch für Zeilattribute)
   1.4 Null-Handling
   1.5 Noise-handling #Perform cross-fold prediction with k=3 and #Perform cross-val prediction with k=3
-  1.6 Missing Values
-  1.7 Ausreißerhandling mit Boxplots (Isolation Forest)
+  1.6 Ausreißerhandling mit Boxplots (Isolation Forest)
+  1.7 FeatureSelection with #low variance(VIF)
   1.8 Heatmap (Features mit wenig Korrelation entfernen)
 
 2. Anpassung des Datensatzes (Encoding)
