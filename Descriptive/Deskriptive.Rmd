@@ -16,9 +16,77 @@ heart
 
 ```{r}
 #Verteilungen (Plots bspw. Weiblich Männlich/Alter, Schiefe der Werte, Streuungsmaß)
+#Ausreißer via Boxplots & Isolation Forest
+print(colnames(heart))
 ggplot(heart, aes(x=as.factor(Sex), y=Age)) + 
     geom_boxplot(fill="slateblue", alpha=0.2) + 
     xlab("Sex")
+ggplot(heart, aes(x=as.factor(Sex), y=RestingBP)) + 
+    geom_boxplot(fill="slateblue", alpha=0.2) + 
+    xlab("Sex")
+ggplot(heart, aes(x=as.factor(Sex), y=Cholesterol)) + 
+    geom_boxplot(fill="slateblue", alpha=0.2) + 
+    xlab("Sex")
+ggplot(heart, aes(x=as.factor(Sex), y=FastingBS)) + 
+    geom_boxplot(fill="slateblue", alpha=0.2) + 
+    xlab("Sex")
+ggplot(heart, aes(x=as.factor(Sex), y=MaxHR)) + 
+    geom_boxplot(fill="slateblue", alpha=0.2) + 
+    xlab("Sex")
+ggplot(heart, aes(x=as.factor(Sex), y=Oldpeak)) + 
+    geom_boxplot(fill="slateblue", alpha=0.2) + 
+    xlab("Sex")
+```
+```{r}
+library("ggplot2")
+library("dplyr")
+library("tidyr")
+ggplot(data=heart, aes(x=Age, group=ChestPainType, fill=ChestPainType)) +
+    geom_density(adjust=1, alpha=.4) +
+    facet_wrap(~Sex) +
+    theme(
+      panel.spacing = unit(0.1, "lines"),
+      axis.ticks.x=element_blank()
+    )
+ggplot(data=heart, aes(x=Age, group=RestingECG, fill=RestingECG)) +
+    geom_density(adjust=1, alpha=.4) +
+    facet_wrap(~Sex) +
+    theme(
+      panel.spacing = unit(0.1, "lines"),
+      axis.ticks.x=element_blank()
+    )
+ggplot(data=heart, aes(x=Age, group=ExerciseAngina, fill=ExerciseAngina)) +
+    geom_density(adjust=1, alpha=.4) +
+    facet_wrap(~Sex) +
+    theme(
+      panel.spacing = unit(0.1, "lines"),
+      axis.ticks.x=element_blank()
+    )
+ggplot(data=heart, aes(x=Age, group=ST_Slope, fill=ST_Slope)) +
+    geom_density(adjust=1, alpha=.4) +
+    facet_wrap(~Sex) +
+    theme(
+      panel.spacing = unit(0.1, "lines"),
+      axis.ticks.x=element_blank()
+    )
+    
+ggplot(data=heart, aes(x=Age, group=HeartDisease, fill=HeartDisease)) +
+    geom_density(adjust=1, alpha=.4) +
+    facet_wrap(~ExerciseAngina) +
+    theme(
+      panel.spacing = unit(0.1, "lines"),
+      axis.ticks.x=element_blank()
+    )
+ggplot(data=heart, aes(x=ST_Slope, group=HeartDisease, fill=HeartDisease)) +
+    geom_density(adjust=1, alpha=.4) +
+    facet_wrap(~ExerciseAngina) +
+    theme(
+      panel.spacing = unit(0.1, "lines"),
+      axis.ticks.x=element_blank()
+    )
+ #is.null für zeilen nicht für Columns
+apply(heart, 2, function(x) any(is.null(x)))
+
 #Häufigkeiten, Mittelwert, Median und Modus (Modus auch für Zeilattribute)
 ```
 
