@@ -11,6 +11,15 @@ heart
 
 ```{r}
 #Beschreibung des Datensatzes und er Attribute
+
+
+#import statistics as stat
+#g1 = df_enc['G1']
+#modeg1 = stat.mode(g1)
+#print ('Modus der Zwischennote (G1):', modeg1)
+names(heart)
+str(heart)
+
 #Werteräume/Datentypen/wie viele Datensätze u. Attribute
 ```
 
@@ -34,6 +43,26 @@ ggplot(heart, aes(x=as.factor(Sex), y=MaxHR)) +
     geom_boxplot(fill="slateblue", alpha=0.2) + 
     xlab("Sex")
 ggplot(heart, aes(x=as.factor(Sex), y=Oldpeak)) + 
+    geom_boxplot(fill="slateblue", alpha=0.2) + 
+    xlab("Sex")
+
+### 2. Schritt: Spalten mit Character in Numerics umwandeln (Sex, ChestPainType, RestingECG, ExerciseAngina, ST_Slope)
+### https://stackoverflow.com/questions/47857066/replace-characters-in-a-column-with-numbers-r
+heart$ChestPainType <- as.numeric(c("ATA" = 0, "NAP" = 1, "ASY" = 2, "TA" = 3)[heart$ChestPainType])
+heart$RestingECG <- as.numeric(c("Normal" = 0, "ST" = 1, "LVH" = 2)[heart$RestingECG])
+heart$ExerciseAngina <- as.numeric(c("N" = 0, "Y" = 1)[heart$ExerciseAngina])
+heart$ST_Slope <- as.numeric(c("Up" = 0, "Flat" = 1, "Down" = 2))
+
+ggplot(heart, aes(x=as.factor(Sex), y=ChestPainType)) + 
+    geom_boxplot(fill="slateblue", alpha=0.2) + 
+    xlab("Sex")
+ggplot(heart, aes(x=as.factor(Sex), y=RestingECG)) + 
+    geom_boxplot(fill="slateblue", alpha=0.2) + 
+    xlab("Sex")
+ggplot(heart, aes(x=as.factor(Sex), y=ExerciseAngina)) + 
+    geom_boxplot(fill="slateblue", alpha=0.2) + 
+    xlab("Sex")
+ggplot(heart, aes(x=as.factor(Sex), y=ST_Slope)) + 
     geom_boxplot(fill="slateblue", alpha=0.2) + 
     xlab("Sex")
 ```
@@ -96,8 +125,29 @@ print("Checking if there is NULL Values in the Dataset!")
 apply(heart, 2, function(x) any(is.na(x)))
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 #NoiseHandling
+#Perform cross-fold prediction with k=3
+#install.packages("purrr")
+#install.packages("tibble")
+#install.packages("vctrs")
+#install.packages("e1071")
+#install.packages("randomForest")
+library(randomForest)
+library(e1071)
+library(tibble)
+library(modelr)
+library(purrr)
+#Split Dataset into 5 sets, with training and test data
+cv  <- crossv_kfold(heart, k = 5)
+
+clf1 <- lm(data=heart)  # build linear regression model on full data
+clf2 <- svm(Age ~ ., data = heart)
+clf3 <- randomForest(HeartDisease ~ .,data=heart, importance=TRUE,proximity=TRUE)
+clf1
+clf2
+clf3
+
 ```
 
 ```{r}
@@ -136,5 +186,10 @@ pheatmap(heart_Corr_Matrix, display_numbers = T, cluster_rows=F, cluster_cols=F)
 
 ```
 
+<!-- ### 2. Schritt: Spalten mit Character in Numerics umwandeln (Sex, ChestPainType, RestingECG, ExerciseAngina, ST_Slope) -->
+<!-- ### https://stackoverflow.com/questions/47857066/replace-characters-in-a-column-with-numbers-r -->
+<!-- heart$ChestPainType <- as.numeric(c("ATA" = 0, "NAP" = 1, "ASY" = 2, "TA" = 3)[heart$ChestPainType]) -->
+<!-- heart$RestingECG <- as.numeric(c("Normal" = 0, "ST" = 1, "LVH" = 2)[heart$RestingECG]) -->
+<!-- heart$ExerciseAngina <- as.numeric(c("N" = 0, "Y" = 1)[heart$ExerciseAngina]) -->
+<!-- heart$ST_Slope <- as.numeric(c("Up" = 0, "Flat" = 1, "Down" = 2)) -->
 
-  

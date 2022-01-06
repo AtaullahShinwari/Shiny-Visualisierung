@@ -3,28 +3,191 @@ title: "BayesModel"
 output: html_document
 ---
 
+```{r}
+#install.packages("psych")
+#library(psych)
+heart <- read.csv(file="/Users/christian.willmann/Desktop/heart.csv")
+heart$ID <- seq.int(nrow(heart))
+heart<-heart[,c(ncol(heart),1:(ncol(heart)-1))]
+heart
+apply(heart, 2, function(x) any(is.na(x)))
+summary(heart)
+str(heart)
+
+#Trennen der Variablen von den Ziellabel
+heartVariables <- heart[,1:12] # Selecting the first 13 colums as variables
+heartVariables
+
+heartDiseasePrediction <- rbind(heart[,13:13],heart[,1:1])# Selecting the last Column as Prediction
+heartDiseasePrediction<-t(heartDiseasePrediction)
+heartDiseasePrediction<-heartDiseasePrediction[,c(ncol(heartDiseasePrediction),1:(ncol(heartDiseasePrediction)-1))]
+colnames(heartDiseasePrediction) <- c("ID", "heartDiseasePrediction")
+heartDiseasePrediction
+
+#Changing Age in characters
+column <- 2
+mini<-min(heartVariables[,column])
+maxi<-max(heartVariables[,column])
+span<-maxi-mini
+breaks<- 7
+steps<-span/breaks
+bins <- c(mini-1)
+for(i in 1:breaks){
+    bins <- c(bins,(mini+i*steps))
+    }
+#DF clearen
+bin_names <- c(paste0(mini,"-",mini+breaks)) 
+for(i in 1:(breaks-1)){
+    bin_names <- c(bin_names,paste0(mini+i*breaks,"-",mini+(i+1)*breaks)) 
+    }
+bin_names
+heartVariables$Age <- cut(heartVariables$Age, breaks = bins, labels = bin_names)
+summary(heartVariables$Age)
+plot(heartVariables$Age)
+
+
+#Changing RestingBP in characters
+column <- 5
+
+mini<-min(heartVariables[,column])
+maxi<-max(heartVariables[,column])
+span<-maxi-mini
+breaks<- 10
+steps<-span/breaks
+bins <- c(mini-1)
+for(i in 1:breaks){
+    bins <- c(bins,(mini+i*steps)) 
+    }
+#DF clearen
+bin_names <- c(paste0(mini,"-",mini+breaks)) 
+for(i in 1:(breaks-1)){
+    bin_names <- c(bin_names,paste0(mini+i*breaks,"-",mini+(i+1)*breaks)) 
+    }
+bin_names
+
+heartVariables$RestingBP <- cut(heartVariables$RestingBP, breaks = bins, labels = bin_names)
+summary(heartVariables$RestingBP)
+plot(heartVariables$RestingBP)
+
+
+#Changing Cholesterol in characters
+column <- 6
+
+mini<-min(heartVariables[,column])
+maxi<-max(heartVariables[,column])
+span<-maxi-mini
+breaks<- 10
+steps<-span/breaks
+bins <- c(mini-1)
+for(i in 1:breaks){
+    bins <- c(bins,(mini+i*steps)) 
+    }
+#DF clearen
+bin_names <- c(paste0(mini,"-",mini+breaks)) 
+for(i in 1:(breaks-1)){
+    bin_names <- c(bin_names,paste0(mini+i*breaks,"-",mini+(i+1)*breaks)) 
+    }
+bin_names
+
+heartVariables$Cholesterol <- cut(heartVariables$Cholesterol, breaks = bins, labels = bin_names)
+summary(heartVariables$Cholesterol)
+plot(heartVariables$Cholesterol)
+
+#Changing MaxHR in characters
+column <- 9
+
+mini<-min(heartVariables[,column])
+maxi<-max(heartVariables[,column])
+span<-maxi-mini
+breaks<- 10
+steps<-span/breaks
+bins <- c(mini-1)
+for(i in 1:breaks){
+    bins <- c(bins,(mini+i*steps)) 
+    }
+#DF clearen
+bin_names <- c(paste0(mini,"-",mini+breaks)) 
+for(i in 1:(breaks-1)){
+    bin_names <- c(bin_names,paste0(mini+i*breaks,"-",mini+(i+1)*breaks)) 
+    }
+bin_names
+
+heartVariables$MaxHR <- cut(heartVariables$MaxHR, breaks = bins, labels = bin_names)
+summary(heartVariables$MaxHR)
+plot(heartVariables$MaxHR)
+
+#Changing Oldpeak in characters
+column <- 11
+
+mini<-min(heartVariables[,column])
+maxi<-max(heartVariables[,column])
+span<-maxi-mini
+breaks<- 9
+steps<-span/breaks
+bins <- c(mini-1)
+for(i in 1:breaks){
+    bins <- c(bins,(mini+i*steps)) 
+    }
+#DF clearen
+bin_names <- c(paste0(mini,"-",mini+breaks)) 
+for(i in 1:(breaks-1)){
+    bin_names <- c(bin_names,paste0(mini+i*breaks,"-",mini+(i+1)*breaks)) 
+    }
+bin_names
+
+heartVariables$Oldpeak <- cut(heartVariables$Oldpeak, breaks = bins, labels = bin_names)
+summary(heartVariables$Oldpeak)
+plot(heartVariables$Oldpeak)
+
+
+# ### 2. Schritt: Spalten mit Character in Numerics umwandeln (Sex, ChestPainType, RestingECG, ExerciseAngina, ST_Slope)
+# ### https://stackoverflow.com/questions/47857066/replace-characters-in-a-column-with-numbers-r
+# heart$Sex <- as.numeric(c("M" = 0, "F" = 1)[heart$Sex])
+# heart$ChestPainType <- as.numeric(c("ATA" = 0, "NAP" = 1, "ASY" = 2, "TA" = 3)[heart$ChestPainType])
+# heart$RestingECG <- as.numeric(c("Normal" = 0, "ST" = 1, "LVH" = 2)[heart$RestingECG])
+# heart$ExerciseAngina <- as.numeric(c("N" = 0, "Y" = 1)[heart$ExerciseAngina])
+# heart$ST_Slope <- as.numeric(c("Up" = 0, "Flat" = 1, "Down" = 2))
+
+heart
+
+```
+
+
+
 ```{r setup, include=FALSE}
 
-#TRAIN TEST SPLIT!!!!!!!!!!!!!
+
+
+#install.packages("NNS")
+#library("NNS")
+#Feature.probability(x, y, threshold = 0, point.est = NULL)
+for (x in 1:13) {
+  print(table(heartVariables[x]))
+  length(heartVariables[x])
+  }
+  
+
 
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+<!-- ```{r cars} -->
+<!-- #Trennen der Variablen von den Ziellabel -->
+<!-- #TRAIN TEST SPLIT!!!!!!!!!!!!! -->
+<!-- heartVariables <- heart[,1:12] # Selecting the first 13 colums as variables -->
+<!-- heartVariables -->
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+<!-- heartDiseasePrediction <- rbind(heart[,13:13],heart[,1:1])# Selecting the last Column as Prediction -->
+<!-- heartDiseasePrediction<-t(heartDiseasePrediction) -->
+<!-- heartDiseasePrediction<-heartDiseasePrediction[,c(ncol(heartDiseasePrediction),1:(ncol(heartDiseasePrediction)-1))] -->
+<!-- colnames(heartDiseasePrediction) <- c("ID", "heartDiseasePrediction") -->
+<!-- heartDiseasePrediction -->
 
-```{r cars}
-summary(cars)
-```
+<!-- ``` -->
 
-## Including Plots
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+<!-- ```{r pressure, echo=FALSE} -->
+<!-- plot(pressure) -->
+<!-- ``` -->
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

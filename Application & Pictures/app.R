@@ -16,8 +16,8 @@ ui <- fluidPage(
                          sidebarPanel(
                              h4("Stochastik Gruppe I"),
                              p("Robert Seidentopf s0537217"),
-                             p("Ata"),
-                             p("Chris"),
+                             p("Ataullah SHinwari s058"),
+                             p("Christian Willmann s0581616"),
                              img(src = "HTW_logo_V2.png"),
                              p( br(),
                                 tagList("URL Katze:", urlcat)
