@@ -152,23 +152,43 @@ heart
 
 ```
 
+```{r message=TRUE, paged.print=TRUE}
+#Ausreißer/0 Wert entfernen in RestingBP
+print(heartVariables)
+print(heartVariables(450,))
+```
 
 
 ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+#Counts & Probabilitys
+#install.packages("tibble")
+library(tibble)
+
+for (x in 2:13) {
+  print(paste("Counts to every feature value of", colnames(heartVariables[x])))
+  counts<- table(heartVariables[x])
+  print(counts)
+  print(paste("Probabilytis to every feature value of", colnames(heartVariables[x])))
+  probs<-((table(heartVariables[x])/918)*100)
+  print(probs)
+  headers<- names(counts)
+  print(headers)
+  concs<-data_frame(headers,counts,probs)
+  print(concs)
+}
+
+#WENN EIN FEHLER AM ENDE KOMMT IST DAS EGAL. DADURCH WERDEN DIE TABLE HIER BESSER ANGEZEIGT.
+```
 
 
 
-#install.packages("NNS")
-#library("NNS")
-#Feature.probability(x, y, threshold = 0, point.est = NULL)
-for (x in 1:13) {
-  print(table(heartVariables[x]))
-  length(heartVariables[x])
-  }
-  
-
+```{r}
 
 ```
+
+
+
 
 
 <!-- ```{r cars} -->
