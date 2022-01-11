@@ -6,6 +6,7 @@ heart <- read.csv(file="/Users/christian.willmann/Desktop/heart.csv")
 heart$ID <- seq.int(nrow(heart))
 heart<-heart[,c(ncol(heart),1:(ncol(heart)-1))]
 heart
+trueHeart<- heart
 ```
 
 
@@ -21,6 +22,9 @@ names(heart)
 str(heart)
 
 #Werteräume/Datentypen/wie viele Datensätze u. Attribute
+#Mean Median Quantile 
+#Häufigkeiten, Mittelwert, Median und Modus (Modus auch für Zielattribute)
+#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ```
 
 ```{r}
@@ -70,28 +74,29 @@ ggplot(heart, aes(x=as.factor(Sex), y=ST_Slope)) +
 library("ggplot2")
 library("dplyr")
 library("tidyr")
-ggplot(data=heart, aes(x=Age, group=ChestPainType, fill=ChestPainType)) +
+heart
+ggplot(data=trueHeart, aes(x=Age, group=ChestPainType, fill=ChestPainType)) +
     geom_density(adjust=1, alpha=.4) +
     facet_wrap(~Sex) +
     theme(
       panel.spacing = unit(0.1, "lines"),
       axis.ticks.x=element_blank()
     )
-ggplot(data=heart, aes(x=Age, group=RestingECG, fill=RestingECG)) +
+ggplot(data=trueHeart, aes(x=Age, group=RestingECG, fill=RestingECG)) +
     geom_density(adjust=1, alpha=.4) +
     facet_wrap(~Sex) +
     theme(
       panel.spacing = unit(0.1, "lines"),
       axis.ticks.x=element_blank()
     )
-ggplot(data=heart, aes(x=Age, group=ExerciseAngina, fill=ExerciseAngina)) +
+ggplot(data=trueHeart, aes(x=Age, group=ExerciseAngina, fill=ExerciseAngina)) +
     geom_density(adjust=1, alpha=.4) +
     facet_wrap(~Sex) +
     theme(
       panel.spacing = unit(0.1, "lines"),
       axis.ticks.x=element_blank()
     )
-ggplot(data=heart, aes(x=Age, group=ST_Slope, fill=ST_Slope)) +
+ggplot(data=trueHeart, aes(x=Age, group=ST_Slope, fill=ST_Slope)) +
     geom_density(adjust=1, alpha=.4) +
     facet_wrap(~Sex) +
     theme(
@@ -99,67 +104,23 @@ ggplot(data=heart, aes(x=Age, group=ST_Slope, fill=ST_Slope)) +
       axis.ticks.x=element_blank()
     )
     
-ggplot(data=heart, aes(x=Age, group=HeartDisease, fill=HeartDisease)) +
+ggplot(data=trueHeart, aes(x=Age, group=HeartDisease, fill=HeartDisease)) +
     geom_density(adjust=1, alpha=.4) +
-    facet_wrap(~ExerciseAngina) +
+    facet_wrap(~Sex) +
     theme(
       panel.spacing = unit(0.1, "lines"),
       axis.ticks.x=element_blank()
     )
-ggplot(data=heart, aes(x=ST_Slope, group=HeartDisease, fill=HeartDisease)) +
-    geom_density(adjust=1, alpha=.4) +
-    facet_wrap(~ExerciseAngina) +
-    theme(
-      panel.spacing = unit(0.1, "lines"),
-      axis.ticks.x=element_blank()
-    )
- #is.null für zeilen nicht für Columns
-apply(heart, 2, function(x) any(is.null(x)))
-
-#Häufigkeiten, Mittelwert, Median und Modus (Modus auch für Zeilattribute)
-```
-
-```{r}
-#NULL-Handling
-print("Checking if there is NULL Values in the Dataset!")
-apply(heart, 2, function(x) any(is.na(x)))
-```
-
-```{r eval=FALSE, include=FALSE}
-#NoiseHandling
-#Perform cross-fold prediction with k=3
-#install.packages("purrr")
-#install.packages("tibble")
-#install.packages("vctrs")
-#install.packages("e1071")
-#install.packages("randomForest")
-library(randomForest)
-library(e1071)
-library(tibble)
-library(modelr)
-library(purrr)
-#Split Dataset into 5 sets, with training and test data
-cv  <- crossv_kfold(heart, k = 5)
-
-clf1 <- lm(data=heart)  # build linear regression model on full data
-clf2 <- svm(Age ~ ., data = heart)
-clf3 <- randomForest(HeartDisease ~ .,data=heart, importance=TRUE,proximity=TRUE)
-clf1
-clf2
-clf3
-
 ```
 
 ```{r}
 #FeatureSelection with low 
 print("Check whether an attribute has low variance (threshold), since there is no variance -> no information!")
 #Sehr wenige eindeutige Werte in Bezug auf die Anzahl der Stichproben und das Verhältnis der Häufigkeit des häufigsten Wertes zum Häufigkeit des zweithäufigsten Wertes ist groß.HIER WERDEN DEFAULT WERTE GENUTZT: Frequenzschnitt = 95/5, uniqueCut = 10, saveMetrics = FALSE, Namen = FALSCH, foreach = FALSCH, allowParallel = WAHR
-names(heart)[nearZeroVar(heart)]
-summary(heart)
-str(heart)
+names(trueHeart)[nearZeroVar(heart)]
+summary(trueHeart)
+str(trueHeart)
 
-
-#Principal Component Analysis
 ```
 
 ```{r}
@@ -174,17 +135,50 @@ heart$ChestPainType <- as.numeric(c("ATA" = 0, "NAP" = 1, "ASY" = 2, "TA" = 3)[h
 heart$RestingECG <- as.numeric(c("Normal" = 0, "ST" = 1, "LVH" = 2)[heart$RestingECG])
 heart$ExerciseAngina <- as.numeric(c("N" = 0, "Y" = 1)[heart$ExerciseAngina])
 heart$ST_Slope <- as.numeric(c("Up" = 0, "Flat" = 1, "Down" = 2))
+
+trueHeart<-subset(trueHeart, select = -c(ST_Slope))
+trueHeart<-subset(trueHeart, select = -c(RestingECG))
+trueHeart<-subset(trueHeart, select = -c(RestingBP))
+
 heart_DepOnCorr<-subset(heart, select = -c(ST_Slope))
 heart_DepOnCorr<-subset(heart_DepOnCorr, select = -c(RestingECG))
 heart_DepOnCorr<-subset(heart_DepOnCorr, select = -c(RestingBP))
+
 heart_FULL_Matrix <- cor(as.matrix(heart))
 heart_Corr_Matrix <- cor(as.matrix(heart_DepOnCorr))
 pheatmap(heart_FULL_Matrix, display_numbers = T, cluster_rows=F, cluster_cols=F)
 pheatmap(heart_Corr_Matrix, display_numbers = T, cluster_rows=F, cluster_cols=F)
 ```
-```{r}
 
+
+
+```{r}
+#Data Preparation
+
+#NULL-Handling
+print("Checking if there is NULL Values in the Dataset!")
+apply(heart_DepOnCorr, 2, function(x) any(is.na(x)))
 ```
+
+```{r message=TRUE, paged.print=TRUE}
+#Ausreißer/0 Wert entfernen in RestingBlut Pressure
+#https://www.kaggle.com/fedesoriano/heart-failure-prediction/discussion/286659
+print(heart_DepOnCorr[450,])
+heart<-heart_DepOnCorr[-450,]
+
+trueHeart<-trueHeart[-450,]
+#Cholestorol with 0(female)
+heart_CholesterolEqualZero <- subset(heart_DepOnCorr, Cholesterol==0)
+heart_CholesterolEqualZero
+#Wegen hoher Anzahl an falsch aufgenommener Cholesterinwerte und einer Korrelation von -0,23, wird das Feature entfert
+heart_selected<-subset(heart_DepOnCorr, select = -c(Cholesterol))
+heart_selected
+
+trueHeart<- subset(trueHeart, select = -c(Cholesterol))
+trueHeart
+```
+
+
 
 <!-- ### 2. Schritt: Spalten mit Character in Numerics umwandeln (Sex, ChestPainType, RestingECG, ExerciseAngina, ST_Slope) -->
 <!-- ### https://stackoverflow.com/questions/47857066/replace-characters-in-a-column-with-numbers-r -->
