@@ -136,14 +136,6 @@ heart$RestingECG <- as.numeric(c("Normal" = 0, "ST" = 1, "LVH" = 2)[heart$Restin
 heart$ExerciseAngina <- as.numeric(c("N" = 0, "Y" = 1)[heart$ExerciseAngina])
 heart$ST_Slope <- as.numeric(c("Up" = 0, "Flat" = 1, "Down" = 2))
 
-trueHeart<-subset(trueHeart, select = -c(ST_Slope))
-trueHeart<-subset(trueHeart, select = -c(RestingECG))
-trueHeart<-subset(trueHeart, select = -c(RestingBP))
-
-heart_DepOnCorr<-subset(heart, select = -c(ST_Slope))
-heart_DepOnCorr<-subset(heart_DepOnCorr, select = -c(RestingECG))
-heart_DepOnCorr<-subset(heart_DepOnCorr, select = -c(RestingBP))
-
 heart_FULL_Matrix <- cor(as.matrix(heart))
 heart_Corr_Matrix <- cor(as.matrix(heart_DepOnCorr))
 pheatmap(heart_FULL_Matrix, display_numbers = T, cluster_rows=F, cluster_cols=F)

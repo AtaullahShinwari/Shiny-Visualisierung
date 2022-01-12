@@ -9,11 +9,8 @@ heart <- read.csv(file="/Users/christian.willmann/Desktop/heart.csv")
 heart$ID <- seq.int(nrow(heart))
 heart<-heart[,c(ncol(heart),1:(ncol(heart)-1))]
 heart
-trueHeart<-subset(heart, select = -c(ST_Slope))
-trueHeart<-subset(trueHeart, select = -c(RestingECG))
-trueHeart<-subset(trueHeart, select = -c(RestingBP))
-trueHeart<-subset(trueHeart, select = -c(Cholesterol))
-
+#Subsetting without Cholesterol and the Data which has RestingBP = 0
+trueHeart<-subset(heart, select = -c(Cholesterol))
 trueHeart<-trueHeart[-450,]
 trueHeart
 ```
@@ -25,14 +22,8 @@ summary(trueHeart)
 str(trueHeart)
 
 #Trennen der Variablen von den Ziellabel
-heartVariables <- trueHeart[,1:8] # Selecting the first 8 colums as variables
-heartVariables
+heartVariables <- trueHeart
 
-heartDiseasePrediction <- rbind(heart_selected[,8:8],heart_selected[,1:1])# Selecting the last Column as Prediction
-heartDiseasePrediction<-t(heartDiseasePrediction)
-heartDiseasePrediction<-heartDiseasePrediction[,c(ncol(heartDiseasePrediction),1:(ncol(heartDiseasePrediction)-1))]
-colnames(heartDiseasePrediction) <- c("ID", "heartDiseasePrediction")
-heartDiseasePrediction
 
 #Changing Age in characters
 column <- 2
@@ -55,7 +46,31 @@ heartVariables$Age <- cut(heartVariables$Age, breaks = bins, labels = bin_names)
 summary(heartVariables$Age)
 plot(heartVariables$Age)
 
-column <- 6
+
+column <- 5
+
+mini<-min(heartVariables[,column])
+maxi<-max(heartVariables[,column])
+span<-maxi-mini
+breaks<- 10
+steps<-span/breaks
+bins <- c(mini-1)
+for(i in 1:breaks){
+    bins <- c(bins,(mini+i*steps)) 
+    }
+#DF clearen
+bin_names <- c(paste0(mini,"-",mini+steps)) 
+for(i in 1:(breaks-1)){
+    bin_names <- c(bin_names,paste0(mini+i*steps,"-",mini+(i+1)*steps)) 
+    }
+bin_names
+
+heartVariables$RestingBP <- cut(heartVariables$RestingBP, breaks = bins, labels = bin_names)
+summary(heartVariables$RestingBP)
+plot(heartVariables$RestingBP)
+
+
+column <- 8
 
 mini<-min(heartVariables[,column])
 maxi<-max(heartVariables[,column])
@@ -77,8 +92,7 @@ heartVariables$MaxHR <- cut(heartVariables$MaxHR, breaks = bins, labels = bin_na
 summary(heartVariables$MaxHR)
 plot(heartVariables$MaxHR)
 
-
-column <- 8
+column <- 10
 
 mini<-min(heartVariables[,column])
 maxi<-max(heartVariables[,column])
@@ -108,37 +122,34 @@ heart
 #Counts & Probabilitys
 #install.packages("tibble")
 library(tibble)
-getProbsStuff<-function(column){
-  print(paste("Counts to every feature value of", colnames(trueHeart[x])))
-  counts<- table(trueHeart[x])
+getProbsStuff<-function(Datensatz ,column){
+  print(paste("Counts to every feature value of", colnames(Datensatz[column])))
+  counts<- table(Datensatz[column])
   print(counts)
-  print(paste("Probabilytis to every feature value of", colnames(trueHeart[x])))
-  probs<-((table(trueHeart[x])/nrow(trueHeart))*100)
-  NOTprobs<-(100-((table(trueHeart[x])/nrow(trueHeart))*100))
+  print(paste("Probabilytis to every feature value of", colnames(Datensatz[column])))
+  probs<-((table(Datensatz[column])/nrow(Datensatz))*100)
+  NOTprobs<-(100-((table(Datensatz[column])/nrow(Datensatz))*100))
   print(probs)
   headers<- names(counts)
-  print(headers)
   concs<-data_frame(headers,counts,probs,NOTprobs)
-  print(concs)
   return(concs)
 }
-Age<-getProbsStuff(2)
-
+conc<-getProbsStuff(heartVariables,8)
+#Unabhängikeits annahme !!!!!!!!!!!!!!!!!!!!!
 #WENN EIN FEHLER AM ENDE KOMMT IST DAS EGAL. DADURCH WERDEN DIE TABLE HIER BESSER ANGEZEIGT.
 ```
 
 
 
 ```{r}
-
-
+#Balkendiagramm mit den Wahrscheinlichkeiten
+#Hier nur ein Feature, vl ist des einfacher
 #install.packages("rpart")
 library(rpart)
 binary.model <-rpart(HeartDisease ~ ., data = trueHeart, cp = .02)
 plot(binary.model)
 
-
-  #plot(concs,uniform= T, compress=T,branch=0,7)
+#plot(concs,uniform= T, compress=T,branch=0,7)
 
 ```
 ```{r}
@@ -147,6 +158,48 @@ rpart.plot(survived, type = 3, clip.right.labs = FALSE, branch = .3, under = TRU
 rpart.rules(survived, cover = TRUE)
 ```
  
+```{r}
+heartVariables
+heart_AgeInBorder <- subset(heartVariables, heartVariables[2]!="72.1-77")
+heart_AgeInBorder
+concTRUE<-getProbsStuff(heart_AgeInBorder,12)
+view(heart_AgeInBorder)
+concTRUE$probs[1]
+
+```
+
+
+```{r}
+library(readxl)
+#X represents an HeartDisease=1 
+computeBayes<- function(P_X_value,P_value,P_X_NOTvalue,P_NOTvalue){
+  print(paste("P(1/value)",P_X_value))
+  print(paste("P(value)",P_value))
+  print(paste("P(1/NOTvalue)",P_X_NOTvalue))
+  print(paste("P(NOTvalue)",P_NOTvalue))
+  #Formel to compute the Bayes
+  P_value_X<-((P_X_value*P_value)/((P_X_value*P_value)+(P_X_NOTvalue*P_NOTvalue))*100)
+  print(P_value_X)
+  return (P_value_X)
+}
+
+
+getDATAforBayes <-function(path,colNUM){
+C_P <- read_excel(path)
+for(rangeOFvalue in C_P$headers){
+  #Subset Heart to get the Column
+  SUBofValue <- subset(heartVariables, heartVariables[colNUM]==rangeOFvalue)
+  NOTinValueRange<-subset(heartVariables, heartVariables[colNUM]!=rangeOFvalue)
+  conclusion<-getProbsStuff(SUBofValue,12)
+  conclusion4NOTinRange<-getProbsStuff(NOTinValueRange,12)
+  #Subset the whole, to get the Prob. of each Value
+  ConcValueLine <- subset(C_P, headers==rangeOFvalue)
+  bin<-computeBayes(conclusion$probs[2],ConcValueLine$probs[1],conclusion4NOTinRange$probs[2],ConcValueLine$NOTprobs[1])
+  print(bin)
+}
+}
+getDATAforBayes("/Users/christian.willmann/Documents/Shiny-Visualisierung/BayesModel/Counts&Probabilitys/C&P_Age.xlsx", 2)
+```
  
  
 
