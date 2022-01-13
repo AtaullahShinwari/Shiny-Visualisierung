@@ -46,32 +46,30 @@ heartVariables$Age <- cut(heartVariables$Age, breaks = bins, labels = bin_names)
 summary(heartVariables$Age)
 plot(heartVariables$Age)
 
-
-column <- 5
-
-mini<-min(heartVariables[,column])
-maxi<-max(heartVariables[,column])
-span<-maxi-mini
-breaks<- 10
-steps<-span/breaks
-bins <- c(mini-1)
-for(i in 1:breaks){
-    bins <- c(bins,(mini+i*steps)) 
-    }
-#DF clearen
-bin_names <- c(paste0(mini,"-",mini+steps)) 
-for(i in 1:(breaks-1)){
-    bin_names <- c(bin_names,paste0(mini+i*steps,"-",mini+(i+1)*steps)) 
-    }
-bin_names
-
-heartVariables$RestingBP <- cut(heartVariables$RestingBP, breaks = bins, labels = bin_names)
-summary(heartVariables$RestingBP)
-plot(heartVariables$RestingBP)
+breakfunction <- function(indexCol, breakings)
+  column <- indexCol
+  mini<-min(heartVariables[,column])
+  maxi<-max(heartVariables[,column])
+  span<-maxi-mini
+  breaks<- breakings
+  steps<-span/breaks
+  bins <- c(mini-1)
+  for(i in 1:breaks){
+      bins <- c(bins,(mini+i*steps)) 
+      }
+  #DF clearen
+  bin_names <- c(paste0(mini,"-",mini+steps)) 
+  for(i in 1:(breaks-1)){
+      bin_names <- c(bin_names,paste0(mini+i*steps,"-",mini+(i+1)*steps)) 
+      }
+  bin_names
+  heartVariables$RestingBP <- cut(heartVariables$RestingBP, breaks = bins, labels = bin_names)
+  summary(heartVariables$RestingBP)
+  diagramm<-plot(heartVariables$RestingBP)
+  return(diagramm)
 
 
 column <- 8
-
 mini<-min(heartVariables[,column])
 maxi<-max(heartVariables[,column])
 span<-maxi-mini
@@ -179,26 +177,38 @@ computeBayes<- function(P_X_value,P_value,P_X_NOTvalue,P_NOTvalue){
   print(paste("P(NOTvalue)",P_NOTvalue))
   #Formel to compute the Bayes
   P_value_X<-((P_X_value*P_value)/((P_X_value*P_value)+(P_X_NOTvalue*P_NOTvalue))*100)
-  print(P_value_X)
-  return (P_value_X)
+  return (signif(P_value_X,6))
 }
 
 
 getDATAforBayes <-function(path,colNUM){
-C_P <- read_excel(path)
-for(rangeOFvalue in C_P$headers){
-  #Subset Heart to get the Column
-  SUBofValue <- subset(heartVariables, heartVariables[colNUM]==rangeOFvalue)
-  NOTinValueRange<-subset(heartVariables, heartVariables[colNUM]!=rangeOFvalue)
-  conclusion<-getProbsStuff(SUBofValue,12)
-  conclusion4NOTinRange<-getProbsStuff(NOTinValueRange,12)
-  #Subset the whole, to get the Prob. of each Value
-  ConcValueLine <- subset(C_P, headers==rangeOFvalue)
-  bin<-computeBayes(conclusion$probs[2],ConcValueLine$probs[1],conclusion4NOTinRange$probs[2],ConcValueLine$NOTprobs[1])
-  print(bin)
-}
+  bins <- c()
+  headers<- c()
+  C_P <- read_excel(path)
+  for(rangeOFvalue in C_P$headers){
+    #Subset Heart to get the Column
+    SUBofValue <- subset(heartVariables, heartVariables[colNUM]==rangeOFvalue)
+    NOTinValueRange<-subset(heartVariables, heartVariables[colNUM]!=rangeOFvalue)
+    conclusion<-getProbsStuff(SUBofValue,12)
+    conclusion4NOTinRange<-getProbsStuff(NOTinValueRange,12)
+    #Subset the whole, to get the Prob. of each Value
+    ConcValueLine <- subset(C_P, headers==rangeOFvalue)
+    bin<-computeBayes(conclusion$probs[2],ConcValueLine$probs[1],conclusion4NOTinRange$probs[2],ConcValueLine$NOTprobs[1])
+    bins <- c(bins,bin)
+    head<- rangeOFvalue
+    headers <- c(headers,head)
+  }
+  names(bins)<- headers
+
+  view(bins)
+  xxy<-barplot(height = bins, las=2,5, cex.names=.9,col = rainbow(20),ylim=c(0,50))
+  text(x = xxy, y = bins, label = bins, pos = 3, cex = 0.8, col = "red")
 }
 getDATAforBayes("/Users/christian.willmann/Documents/Shiny-Visualisierung/BayesModel/Counts&Probabilitys/C&P_Age.xlsx", 2)
+
+#https://stackoverflow.com/questions/16121903/r-barplot-y-axis-scale-too-short
+#https://swcarpentry.github.io/r-novice-inflammation/02-func-R/
+
 ```
  
  
