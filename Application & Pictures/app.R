@@ -30,7 +30,23 @@ ui <- fluidPage(
                          )),
                 tabPanel("Der Datensatz", 
                          sidebarLayout(position = "left", fluid = TRUE,sidebarPanel(selectInput("plotname", "Plot auswählen", c("Altersverteilung","Art des Brustschmerzes","Ruhepulsverteilung", "Cholesterolspiegel","Blutzuckerspiegelverteilung","Ergebnisse des Ruhe-Elektrokardiogramms", "Höchster gemessener Herzschlag", "Angina durch Belastung", "OldPeak", "ST_Slope", "HeartDisease")), actionButton("heat", "Heatmap"),checkboxGroupInput("checkbox", "Datansatz auswählen", choices = c("Rohdaten", "ohne Ausreißer"), selected = "Rohdaten")), mainPanel(plotlyOutput("selectplot"), br(), plotOutput("heat")))),
-                tabPanel("Satz von Bayes")
+                tabPanel("Satz von Bayes",                         
+                         sidebarLayout(position = "left",
+                                       fluid = TRUE,
+                                       sidebarPanel(selectInput("plotname",
+                                                                "Plot auswählen",
+                                                                c("Altersverteilung",
+                                                                  "Art des Brustschmerzes",
+                                                                  "Ruhepulsverteilung",
+                                                                  "Cholesterolspiegel",
+                                                                  "Blutzuckerspiegelverteilung",
+                                                                  "Ergebnisse des Ruhe-Elektrokardiogramms",
+                                                                  "Höchster gemessener Herzschlag",
+                                                                  "Angina durch Belastung", 
+                                                                  "OldPeak",
+                                                                  "ST_Slope", 
+                                                                  "HeartDisease"))),
+                                       mainPanel(plotlyOutput("getDATAforBayes")))),
                 #Quelle: https://shiny.rstudio.com/articles/tabsets.html
                 
                 
@@ -39,6 +55,31 @@ ui <- fluidPage(
 
 
 server <- function(input, output) {
+  
+  
+output$getDATAforBayes <-renderPlotly({
+  column <- 10
+  
+  mini<-min(heartVariables[,column])
+  maxi<-max(heartVariables[,column])
+  span<-maxi-mini
+  breaks<- 10
+  steps<-span/breaks
+  bins <- c(mini-1)
+  for(i in 1:breaks){
+    bins <- c(bins,(mini+i*steps)) 
+  }
+  #DF clearen
+  bin_names <- c(paste0(mini,"-",mini+steps)) 
+  for(i in 1:(breaks-1)){
+    bin_names <- c(bin_names,paste0(mini+i*steps,"-",mini+(i+1)*steps)) 
+  }
+  bin_names
+  
+  heartVariables$Oldpeak <- cut(heartVariables$Oldpeak, breaks = bins, labels = bin_names)
+  summary(heartVariables$Oldpeak)
+  plot(heartVariables$Oldpeak)
+})
 
 output$selectplot <- renderPlotly({   
     if(input$checkbox == "Rohdaten"){
